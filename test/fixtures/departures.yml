@@ -1,0 +1,63 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  year: 1
+  month: 1
+  day_of_month: 1
+  day_of_week: 1
+  dep_time: 1
+  crs_dep_time: 1
+  arr_time: 1
+  crs_arr_time: 1
+  unique_carrier: MyString
+  flight_num: 1
+  tail_num: MyString
+  actual_elapsed_time: 1
+  crs_elapsed_time: 1
+  air_time: 1
+  arr_delay: 1
+  dep_delay: 1
+  origin: MyString
+  dest: MyString
+  distance: 1
+  taxi_in: 1
+  taxi_out: 1
+  cancelled: false
+  cancellation_code: MyString
+  diverted: false
+  carrier_delay: 1
+  weather_delay: 1
+  nas_delay: 1
+  security_delay: 1
+  late_aircraft_delay: 1
+
+two:
+  year: 1
+  month: 1
+  day_of_month: 1
+  day_of_week: 1
+  dep_time: 1
+  crs_dep_time: 1
+  arr_time: 1
+  crs_arr_time: 1
+  unique_carrier: MyString
+  flight_num: 1
+  tail_num: MyString
+  actual_elapsed_time: 1
+  crs_elapsed_time: 1
+  air_time: 1
+  arr_delay: 1
+  dep_delay: 1
+  origin: MyString
+  dest: MyString
+  distance: 1
+  taxi_in: 1
+  taxi_out: 1
+  cancelled: false
+  cancellation_code: MyString
+  diverted: false
+  carrier_delay: 1
+  weather_delay: 1
+  nas_delay: 1
+  security_delay: 1
+  late_aircraft_delay: 1
