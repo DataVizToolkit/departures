@@ -34,3 +34,14 @@ path.chord {
 #circle:hover path.fade {
   display: none;
 }
+
+// Timeline
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+path {
+  fill: transparent;
+  stroke: #000;
+}

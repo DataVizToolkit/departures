@@ -101,3 +101,59 @@ function makeChordChart(route) {
     }
   });
 }
+
+function makeTimeline() {
+  var margin = {top: 10, right: 0, bottom: 20, left: 0},
+      width  = 960 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+  // Create a default datetime range for the axis
+  var x = d3.time.scale.utc()
+      .domain([new Date(1999, 0, 1), new Date(1999, 0, 2)])
+      .range([0, width]);
+
+  var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom")
+      .ticks(d3.time.hours)
+      .tickSize(16, 0)
+      .tickFormat(d3.time.format("%I %p"));
+
+  var svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+    .selectAll(".tick text")
+      .style("text-anchor", "start")
+      .attr("x", 6)
+      .attr("y", 6);
+
+  d3.json('/departures/timeline_data?date=1999-01-01', function(error, data) {
+    var data = data.data;
+    // reset the X axis to the correct day's hours
+    var startDate = new Date(data[0].hourly);
+    var endDate   = new Date(data[0].hourly);
+    endDate.setDate(endDate.getDate() + 1);
+    x.domain([startDate, endDate]);
+    svg.select(".x.axis")
+      .call(xAxis)
+      .selectAll(".tick text")
+        .style("text-anchor", "start")
+        .attr("x", 6)
+        .attr("y", 6);
+
+    // Draw dots for the departures on the x-axis (timeline)
+    svg.selectAll("dot")
+        .data(data.filter(function(d) { return d.origin !== null }))
+      .enter().append("circle")
+        .attr("r", 3.5)
+        .attr("cx", function(d) { return x(new Date(d.departure_time)); })
+        .attr("cy", function(d) { return height; });
+  });
+}
