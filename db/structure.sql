@@ -163,6 +163,34 @@ CREATE TABLE schema_migrations (
 );
 
 
+SET search_path = reporting, pg_catalog;
+
+--
+-- Name: june_departures; Type: MATERIALIZED VIEW; Schema: reporting; Owner: -
+--
+
+CREATE MATERIALIZED VIEW june_departures AS
+ SELECT departures.id,
+    departures.unique_carrier,
+    departures.flight_num,
+    departures.tail_num,
+    departures.origin,
+    departures.dest,
+    lead(departures.origin) OVER (PARTITION BY departures.tail_num ORDER BY departures.day_of_month, departures.dep_time) AS next_origin,
+    to_date(((((departures.year || '-'::text) || departures.month) || '-'::text) || departures.day_of_month), 'YYYY-MM-DD'::text) AS dep_date,
+    departures.dep_time,
+    departures.arr_time,
+    departures.actual_elapsed_time,
+    departures.dep_delay,
+    departures.arr_delay,
+    departures.diverted
+   FROM public.departures
+  WHERE ((departures.year = 1999) AND (departures.month = 6) AND (departures.cancelled = false))
+  WITH NO DATA;
+
+
+SET search_path = public, pg_catalog;
+
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
@@ -264,6 +292,45 @@ CREATE INDEX index_departures_on_year ON departures USING btree (year);
 CREATE UNIQUE INDEX unique_schema_migrations ON schema_migrations USING btree (version);
 
 
+SET search_path = reporting, pg_catalog;
+
+--
+-- Name: index_reporting.june_departures_on_dep_date_and_dep_time; Type: INDEX; Schema: reporting; Owner: -
+--
+
+CREATE INDEX "index_reporting.june_departures_on_dep_date_and_dep_time" ON june_departures USING btree (dep_date, dep_time);
+
+
+--
+-- Name: index_reporting.june_departures_on_dest; Type: INDEX; Schema: reporting; Owner: -
+--
+
+CREATE INDEX "index_reporting.june_departures_on_dest" ON june_departures USING btree (dest);
+
+
+--
+-- Name: index_reporting.june_departures_on_origin; Type: INDEX; Schema: reporting; Owner: -
+--
+
+CREATE INDEX "index_reporting.june_departures_on_origin" ON june_departures USING btree (origin);
+
+
+--
+-- Name: index_reporting.june_departures_on_tail_num; Type: INDEX; Schema: reporting; Owner: -
+--
+
+CREATE INDEX "index_reporting.june_departures_on_tail_num" ON june_departures USING btree (tail_num);
+
+
+--
+-- Name: index_reporting.june_departures_on_unique_carrier; Type: INDEX; Schema: reporting; Owner: -
+--
+
+CREATE INDEX "index_reporting.june_departures_on_unique_carrier" ON june_departures USING btree (unique_carrier);
+
+
+SET search_path = public, pg_catalog;
+
 --
 -- Name: fk_rails_2efd7d3e72; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
@@ -305,4 +372,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160517193058');
 INSERT INTO schema_migrations (version) VALUES ('20160517201536');
 
 INSERT INTO schema_migrations (version) VALUES ('20160517212635');
+
+INSERT INTO schema_migrations (version) VALUES ('20160517213905');
 
