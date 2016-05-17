@@ -119,6 +119,13 @@ function makeTimeline() {
       .tickSize(16, 0)
       .tickFormat(d3.time.format("%I %p"));
 
+  // ** function to draw a curved line given 3 points
+  var curved = d3.svg.line()
+      .x(function(d) { return d.x; })
+      .y(function(d) { return d.y; })
+      .interpolate("cardinal")
+      .tension(0);
+
   var svg = d3.select("body").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
@@ -134,8 +141,26 @@ function makeTimeline() {
       .attr("x", 6)
       .attr("y", 6);
 
+  // ** add a focus variable for mouseover tooltip
+  var focus = svg.append("g")
+      .attr("class", "focus")
+      .style("display", "none");
+  focus.append("text")
+      .attr("x", 9)
+      .attr("dy", ".35em");
+
+  // ** Add a title to the chart
+  svg.append("text")
+      .attr('class', 'chart_title')
+      .attr("x", width/2)
+      .attr("y", height/2)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .text("Southwest Airlines Tail Number N509 (1999-01-01)");
+
   d3.json('/departures/timeline_data?date=1999-01-01', function(error, data) {
     var data = data.data;
+    var departures = data.filter(function(d) { return d.origin !== null });
     // reset the X axis to the correct day's hours
     var startDate = new Date(data[0].hourly);
     var endDate   = new Date(data[0].hourly);
@@ -150,10 +175,38 @@ function makeTimeline() {
 
     // Draw dots for the departures on the x-axis (timeline)
     svg.selectAll("dot")
-        .data(data.filter(function(d) { return d.origin !== null }))
+        .data(departures)
       .enter().append("circle")
         .attr("r", 3.5)
         .attr("cx", function(d) { return x(new Date(d.departure_time)); })
         .attr("cy", function(d) { return height; });
+
+    // ** draw curved lines from the departure time to the arrival time
+    var curve = svg.selectAll("curves")
+        .data(departures)
+      .enter().append("path")
+        .attr("d", function(d) {
+          var departureTime = new Date(d.departure_time);
+          var middleTime    = new Date(d.departure_time);
+          var arrivalTime   = new Date(d.arrival_time);
+          middleTime.setMinutes(departureTime.getMinutes() + +d.actual_elapsed_time/2)
+          return curved([
+            {x: x(departureTime), y: height},
+            {x: x(middleTime), y: height - 15},
+            {x: x(arrivalTime), y: height},
+          ])
+        })
+        .on("mouseover", function() { focus.style("display", null); })
+        .on("mouseout", function() { focus.style("display", "none"); })
+        .on("mousemove", function(d) { mousemove(d) });
+
+    // ** generate the text for the mouseover tooltip
+    function mousemove(d) {
+      var departureTime = new Date(d.departure_time);
+      var x0            = x(departureTime);
+      var y0            = height - 30;
+      focus.attr("transform", "translate(" + x0 + "," + y0 + ")");
+      focus.select("text").text(d.origin + " → " + d.dest);
+    }
   });
 }
