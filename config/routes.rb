@@ -5,4 +5,7 @@ Rails.application.routes.draw do
 
   get 'departures/disjointed'
   get 'departures/disjointed_matrix'
+
+  get 'departures/timeline'
+  get 'departures/timeline_data'
 end
