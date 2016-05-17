@@ -49,3 +49,4 @@ gem 'dotenv-rails', :groups => [:development, :test]
 gem 'puma'
 gem 'lograge'
 gem 'scenic'
+gem 'activerecord-postgis-adapter'
