@@ -189,6 +189,49 @@ CREATE MATERIALIZED VIEW june_departures AS
   WITH NO DATA;
 
 
+--
+-- Name: ua_departures; Type: TABLE; Schema: reporting; Owner: -
+--
+
+CREATE TABLE ua_departures (
+    id integer NOT NULL,
+    unique_carrier character varying(8),
+    flight_num integer,
+    tail_num character varying(8),
+    origin character varying(3),
+    dest character varying(3),
+    dep_date date,
+    dep_time integer,
+    arr_time integer,
+    actual_elapsed_time integer,
+    dep_delay integer,
+    arr_delay integer,
+    diverted boolean,
+    next_origin character varying(3),
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: ua_departures_id_seq; Type: SEQUENCE; Schema: reporting; Owner: -
+--
+
+CREATE SEQUENCE ua_departures_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: ua_departures_id_seq; Type: SEQUENCE OWNED BY; Schema: reporting; Owner: -
+--
+
+ALTER SEQUENCE ua_departures_id_seq OWNED BY ua_departures.id;
+
+
 SET search_path = public, pg_catalog;
 
 --
@@ -211,6 +254,17 @@ ALTER TABLE ONLY carriers ALTER COLUMN id SET DEFAULT nextval('carriers_id_seq':
 
 ALTER TABLE ONLY departures ALTER COLUMN id SET DEFAULT nextval('departures_id_seq'::regclass);
 
+
+SET search_path = reporting, pg_catalog;
+
+--
+-- Name: id; Type: DEFAULT; Schema: reporting; Owner: -
+--
+
+ALTER TABLE ONLY ua_departures ALTER COLUMN id SET DEFAULT nextval('ua_departures_id_seq'::regclass);
+
+
+SET search_path = public, pg_catalog;
 
 --
 -- Name: airports_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -235,6 +289,18 @@ ALTER TABLE ONLY carriers
 ALTER TABLE ONLY departures
     ADD CONSTRAINT departures_pkey PRIMARY KEY (id);
 
+
+SET search_path = reporting, pg_catalog;
+
+--
+-- Name: ua_departures_pkey; Type: CONSTRAINT; Schema: reporting; Owner: -
+--
+
+ALTER TABLE ONLY ua_departures
+    ADD CONSTRAINT ua_departures_pkey PRIMARY KEY (id);
+
+
+SET search_path = public, pg_catalog;
 
 --
 -- Name: index_airports_on_iata; Type: INDEX; Schema: public; Owner: -
@@ -374,4 +440,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160517201536');
 INSERT INTO schema_migrations (version) VALUES ('20160517212635');
 
 INSERT INTO schema_migrations (version) VALUES ('20160517213905');
+
+INSERT INTO schema_migrations (version) VALUES ('20160517214857');
 
