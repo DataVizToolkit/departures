@@ -5,6 +5,7 @@ default: &default
   host: <%= ENV["POSTGRES_HOST"] || "localhost" %>
   username: <%= ENV["POSTGRES_USER"] || "developer" %>
   password: <%= ENV["POSTGRES_PASSWORD"] || "password" %>
+  schema_search_path: "public,reporting"
 
 development:
   <<: *default
