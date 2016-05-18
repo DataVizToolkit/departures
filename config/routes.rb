@@ -8,4 +8,7 @@ Rails.application.routes.draw do
 
   get 'departures/timeline'
   get 'departures/timeline_data'
+
+  get 'airports/index'
+  get 'airports/map_data', :defaults => { :format => 'json' }
 end
