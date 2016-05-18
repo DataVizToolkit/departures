@@ -16,6 +16,13 @@ function makeMap() {
     });
     map.addLayer(clusterGroup);
 
+    // Add arc between BLH and CEC
+    var blh = { x: -114.7168764, y: 33.61916278 }
+    ,   cec = { x: -124.2365333, y: 41.78015722 }
+    ,   generator = new arc.GreatCircle(blh, cec, { name: 'BLH to CEC'  })
+    ,   line = generator.Arc(100, { offset: 10  });
+    L.geoJson(line.json()).addTo(map);
+
     map.fitBounds(clusterGroup.getBounds());
   });
 }
