@@ -7,14 +7,15 @@ function makeMap() {
   var map = L.mapbox.map('map', 'mapbox.streets')
     .setView([39.045753, -76.641273], 9);
 
-  // Create a feature layer with the map_data GeoJSON
-  var featureLayer = L.mapbox.featureLayer()
-    .loadURL('/airports/map_data.json')
-    .addTo(map);
+  L.mapbox.featureLayer('/airports/map_data.json').on('ready', function(e) {
+    var clusterGroup = new L.MarkerClusterGroup({
+      maxClusterRadius: 35,
+    });
+    e.target.eachLayer(function(layer) {
+      clusterGroup.addLayer(layer);
+    });
+    map.addLayer(clusterGroup);
 
-  // featureLayer.getBounds() returns the corners of the furthest-out markers,
-  // and map.fitBounds() makes sure that the map contains these.
-  featureLayer.on('ready', function(e) {
-    map.fitBounds(featureLayer.getBounds());
+    map.fitBounds(clusterGroup.getBounds());
   });
 }
