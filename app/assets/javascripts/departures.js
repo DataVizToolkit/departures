@@ -7,19 +7,11 @@ function makeChordChart(route) {
       outerRadius   = Math.min(width, height) / 2 - 30,
       innerRadius   = outerRadius - 24
       formatPercent = d3.format(".1%"),
-      color         = d3.scale.category20();
+      color         = d3.scaleOrdinal(d3.schemeCategory20);
 
-  var arc = d3.svg.arc()
+  var arc = d3.arc()
       .innerRadius(innerRadius)
       .outerRadius(outerRadius);
-
-  var layout = d3.layout.chord()
-      .padding(.04)
-      .sortSubgroups(d3.descending)
-      .sortChords(d3.ascending);
-
-  var path = d3.svg.chord()
-      .radius(innerRadius);
 
   var svg = d3.select("#chart").append("svg")
       .attr("width", width)
@@ -42,8 +34,16 @@ function makeChordChart(route) {
   d3.json(route, function(error, data) {
     var airports = data.airports;
 
+    var layout = d3.chord()
+        .padAngle(.04)
+        .sortSubgroups(d3.descending)
+        .sortChords(d3.ascending);
+
     // Compute the chord layout.
-    layout.matrix(data.matrix);
+    layout = layout(data.matrix);
+
+    var path = d3.ribbon()
+        .radius(innerRadius);
 
     // Add a group per origin.
     var group = svg.selectAll(".group")
@@ -73,12 +73,13 @@ function makeChordChart(route) {
         .text(function(d, i) { return airports[i]; });
 
     // Remove the labels that don't fit. :(
-    groupText.filter(function(d, i) { return groupPath[0][i].getTotalLength() / 2 - 16 < this.getComputedTextLength(); })
-        .remove();
+    groupText.filter(function(d, i) {
+      return groupPath._groups[0][i].getTotalLength() / 2 - 16 < this.getComputedTextLength();
+    }).remove();
 
     // Add the chords.
     var chord = svg.selectAll(".chord")
-        .data(layout.chords)
+        .data(layout)
       .enter().append("path")
         .attr("class", "chord")
         .style("fill", function(d) { return color(d.source.index); })
@@ -108,23 +109,20 @@ function makeTimeline() {
       height = 300 - margin.top - margin.bottom;
 
   // Create a default datetime range for the axis
-  var x = d3.time.scale.utc()
+  var x = d3.scaleUtc()
       .domain([new Date(1999, 0, 1), new Date(1999, 0, 2)])
       .range([0, width]);
 
-  var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom")
-      .ticks(d3.time.hours)
+  var xAxis = d3.axisBottom(x)
+      .ticks(d3.timeHour)
       .tickSize(16, 0)
-      .tickFormat(d3.time.format("%I %p"));
+      .tickFormat(d3.timeFormat("%I %p"));
 
   // ** function to draw a curved line given 3 points
-  var curved = d3.svg.line()
+  var curved = d3.line()
       .x(function(d) { return d.x; })
       .y(function(d) { return d.y; })
-      .interpolate("cardinal")
-      .tension(0);
+      .curve(d3.curveCardinal.tension(0));
 
   var svg = d3.select("body").append("svg")
       .attr("width", width + margin.left + margin.right)
