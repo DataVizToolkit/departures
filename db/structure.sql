@@ -27,6 +27,86 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
+-- Name: departures; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE departures (
+    id integer NOT NULL,
+    year integer,
+    month integer,
+    day_of_month integer,
+    day_of_week integer,
+    dep_time integer,
+    crs_dep_time integer,
+    arr_time integer,
+    crs_arr_time integer,
+    unique_carrier character varying(6),
+    flight_num integer,
+    tail_num character varying(8),
+    actual_elapsed_time integer,
+    crs_elapsed_time integer,
+    air_time integer,
+    arr_delay integer,
+    dep_delay integer,
+    origin character varying(3),
+    dest character varying(3),
+    distance integer,
+    taxi_in integer,
+    taxi_out integer,
+    cancelled boolean,
+    cancellation_code character varying(1),
+    diverted boolean,
+    carrier_delay integer,
+    weather_delay integer,
+    nas_delay integer,
+    security_delay integer,
+    late_aircraft_delay integer,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: aa_departures; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+--
+
+CREATE MATERIALIZED VIEW aa_departures AS
+ WITH base_query AS (
+         SELECT departures.id,
+            departures.unique_carrier,
+            departures.flight_num,
+            departures.tail_num,
+            departures.origin,
+            departures.dest,
+            to_date(((((departures.year || '-'::text) || departures.month) || '-'::text) || departures.day_of_month), 'YYYY-MM-DD'::text) AS dep_date,
+            departures.dep_time,
+            departures.arr_time,
+            departures.actual_elapsed_time,
+            departures.dep_delay,
+            departures.arr_delay,
+            departures.diverted
+           FROM departures
+          WHERE ((departures.unique_carrier)::text = 'AA'::text)
+        )
+ SELECT base_query.id,
+    base_query.unique_carrier,
+    base_query.flight_num,
+    base_query.tail_num,
+    base_query.origin,
+    base_query.dest,
+    base_query.dep_date,
+    base_query.dep_time,
+    base_query.arr_time,
+    base_query.actual_elapsed_time,
+    base_query.dep_delay,
+    base_query.arr_delay,
+    base_query.diverted,
+    lead(base_query.origin) OVER (PARTITION BY base_query.tail_num ORDER BY base_query.tail_num, base_query.dep_date, base_query.dep_time) AS next_origin
+   FROM base_query
+  WITH NO DATA;
+
+
+--
 -- Name: airports; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -94,46 +174,6 @@ CREATE SEQUENCE carriers_id_seq
 --
 
 ALTER SEQUENCE carriers_id_seq OWNED BY carriers.id;
-
-
---
--- Name: departures; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE departures (
-    id integer NOT NULL,
-    year integer,
-    month integer,
-    day_of_month integer,
-    day_of_week integer,
-    dep_time integer,
-    crs_dep_time integer,
-    arr_time integer,
-    crs_arr_time integer,
-    unique_carrier character varying(6),
-    flight_num integer,
-    tail_num character varying(8),
-    actual_elapsed_time integer,
-    crs_elapsed_time integer,
-    air_time integer,
-    arr_delay integer,
-    dep_delay integer,
-    origin character varying(3),
-    dest character varying(3),
-    distance integer,
-    taxi_in integer,
-    taxi_out integer,
-    cancelled boolean,
-    cancellation_code character varying(1),
-    diverted boolean,
-    carrier_delay integer,
-    weather_delay integer,
-    nas_delay integer,
-    security_delay integer,
-    late_aircraft_delay integer,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
 
 
 --
@@ -302,6 +342,27 @@ ALTER TABLE ONLY ua_departures
 
 
 SET search_path = public, pg_catalog;
+
+--
+-- Name: aa_departures_dest_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX aa_departures_dest_idx ON aa_departures USING btree (dest);
+
+
+--
+-- Name: aa_departures_next_origin_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX aa_departures_next_origin_idx ON aa_departures USING btree (next_origin);
+
+
+--
+-- Name: aa_departures_origin_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX aa_departures_origin_idx ON aa_departures USING btree (origin);
+
 
 --
 -- Name: index_airports_on_iata; Type: INDEX; Schema: public; Owner: -
