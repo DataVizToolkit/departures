@@ -26,7 +26,7 @@ function makeChordChart(route) {
       .attr("height", height)
     .append("g")
       .attr("id", "circle")
-      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+      .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
 
   svg.append("circle")
       .attr("r", outerRadius);
@@ -54,7 +54,7 @@ function makeChordChart(route) {
 
     // Add a mouseover title.
     group.append("title").text(function(d, i) {
-      return airports[i] + ": " + formatPercent(d.value) + " of origins";
+      return airports[i] + ": " + formatPercent(d.value) + " of origins"
     });
 
     // Add the group arc.
@@ -73,8 +73,10 @@ function makeChordChart(route) {
         .text(function(d, i) { return airports[i]; });
 
     // Remove the labels that don't fit. :(
-    groupText.filter(function(d, i) { return groupPath[0][i].getTotalLength() / 2 - 16 < this.getComputedTextLength(); })
-        .remove();
+    groupText.filter(function(d, i) {
+      return groupPath[0][i].getTotalLength() /
+             2 - 16 < this.getComputedTextLength();
+    }).remove();
 
     // Add the chords.
     var chord = svg.selectAll(".chord")

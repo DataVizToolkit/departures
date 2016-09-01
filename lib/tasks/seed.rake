@@ -14,9 +14,12 @@ namespace :db do
     desc "Import airport data"
     task :import_airports => :environment do
       if Airport.count == 0
-        filename     = Rails.root.join('db', 'data_files', 'airports.csv')
+        filename = Rails.root.join('db', 'data_files', 'airports.csv')
         fixed_quotes = File.read(filename).gsub(/\\"/,'""')
-        CSV.parse(fixed_quotes, :headers => true, :header_converters => :symbol, :converters => [:blank_to_nil]) do |row|
+        CSV.parse(fixed_quotes,
+                  :headers           => true,
+                  :header_converters => :symbol,
+                  :converters        => [:blank_to_nil]) do |row|
           Airport.create(row.to_hash)
         end
       end
@@ -26,7 +29,9 @@ namespace :db do
     task :import_carriers => :environment do
       if Carrier.count == 0
         filename = Rails.root.join('db', 'data_files', 'carriers.csv')
-        CSV.foreach(filename, :headers => true, :header_converters => :symbol) do |row|
+        CSV.foreach(filename,
+                    :headers           => true,
+                    :header_converters => :symbol) do |row|
           Carrier.create(row.to_hash)
         end
       end
@@ -37,7 +42,10 @@ namespace :db do
       if Departure.count == 0
         filename  = Rails.root.join('db', 'data_files', '1999.csv')
         timestamp = Time.now.to_s(:db)
-        CSV.foreach(filename, :headers => true, :header_converters => :symbol, :converters => [:na_to_nil]) do |row|
+        CSV.foreach(filename,
+                    :headers           => true,
+                    :header_converters => :symbol,
+                    :converters        => [:na_to_nil]) do |row|
           puts "#{$.} #{Time.now}" if $. % 10000 == 0
           data = {
             :year                => DBSanitize::integer(row[:year]),
